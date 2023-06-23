@@ -1,0 +1,12 @@
+1. string into list:
+list("abcde")
+
+2. list into string:
+"".join(list) or " ".join(list)
+
+3.
+return s[:i]+s[j]+s[i+1:j]+s[i]+s[j:]
+or
+li = list(s)
+li[i], li[j] = li[j],li[s]
+return "".join(li)

@@ -1,0 +1,82 @@
+import sys; args = sys.argv[1:]
+import math
+# t_funct is symbol of transfer functions: 'T1', 'T2', 'T3', or 'T4'
+# input is a list of input (summation) values of the current layer
+# returns a list of output values of the current layer 
+def transfer(t_funct, input):
+   if t_funct == "T1":
+      return input
+   elif t_funct == "T2":
+         if input<=0:
+            return 0
+         return input
+   elif t_funct == "T3":
+         if input > 100.0:
+            return 1.0
+         if input < -100.0:
+            return 0
+         return 1.0/(1.0+math.exp(-1*(input)))
+   elif t_funct == "T4":
+      return (-1 + 2/(  1+math.exp(-1*input)))
+   return input
+
+# example: 4 inputs, 12 weights, and 3 stages(the number of next layer nodes)
+# weights are listed like Example Set 1 #4 or on the NN_Lab1_description note
+# returns a list of dot_product result. the len of the list == stage
+# Challenge? one line solution is possible
+def dot_product(input, weights):
+   n = 0
+   for i in range(0, len(weights)):
+      n += weights[i]*input[i]
+   return n
+
+# file has weights information. Read file and store weights in a list or a nested list
+# input_vals is a list which includes input values from terminal
+# t_funct is a string, e.g. 'T1'
+# evaluate the whole network (complete the whole forward feeding)
+# and return a list of output(s)
+def evaluate(file, input_vals, t_funct):
+   weights = []
+   with open(file) as infile:
+      lines = infile.readlines() 
+      for line in lines:
+         strings = ' '.join(line.split()).split()
+         floats = []
+         for i in strings:
+            floats.append(float(i))
+         weights.append(floats)
+   counter = 0
+   size = []
+   output = []
+   output.append(input_vals)
+   size.append(len(input_vals))
+   for i in range(0, len(weights)):
+      size.append(int(len(weights[i])/size[i]))
+   while(counter < len(weights)-1):
+      values = []
+      for j in range(0, int(len(weights[counter])/size[counter])):
+                   values.append(transfer(t_funct, dot_product(output[counter], weights[counter][int(j*size[counter]):int(j*size[counter]+size[counter])])))
+      output.append(values)
+      counter +=1
+   last = output[counter]
+   a = []
+   for i in range(0,len(last)):
+      a.append( last[i]* weights[counter][i])
+   return a
+     
+def main():
+   #args = sys.argv[1:]
+   file, inputs, t_funct, transfer_found = '', [], 'T1', False
+   for idx, arg in enumerate(args):
+      if idx==0:
+         file = arg
+      elif not transfer_found:
+         t_funct, transfer_found = arg, True
+      else:
+         inputs.append(float(arg))
+   if len(file)==0: exit("Error: Weights file is not given")
+   li =(evaluate(file, inputs, t_funct))
+   for x in li:
+      print (x, end=' ')
+if __name__ == '__main__': main()
+
